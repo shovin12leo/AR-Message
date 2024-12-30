@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Message - AR Viewer</title>
-  <script src="https://cdn.8thwall.com/web/aframe/aframe.js"></script>
-  <link rel="stylesheet" href="styles1.css">
+  <title>Virtual NEW YEAR Message</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
     <div class="glass-box">
-      <h1>Welcome to Your AR Message!</h1>
-      <button id="startAR">Start AR</button>
+      <h1 id="welcomeText"></h1>
+      <p>Enter your code to see your personalized AR message:</p>
+      <input type="text" id="codeInput" placeholder="Enter your code">
+      <button id="proceedButton">Proceed</button>
     </div>
   </div>
 
@@ -20,56 +21,36 @@
   </div>
 
   <script>
-    // Function to get the code from the URL
-    function getCodeFromUrl() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get('code');
+    // Typing effect for the welcome text
+    const welcomeText = document.getElementById("welcomeText");
+    const text = "Welcome to Virtual Messages";
+    let index = 0;
+
+    function typeText() {
+      if (index < text.length) {
+        welcomeText.textContent += text.charAt(index);
+        index++;
+        setTimeout(typeText, 100);
+      }
     }
 
-    // Set AR content based on the code entered
-    function setARContent(code) {
-      const arScene = document.createElement('a-scene');
-      const imageElement = document.createElement('a-image');
+    window.onload = () => typeText();
 
-      const imageMap = {
-        'code1': 'w1.jpeg',
-        'code2': 'image2.jpg',
-        'code3': 'image3.jpg',
-        // Add more code-image mappings as needed
-      };
-
-      // If the code has a corresponding image, show it in the AR scene
-      if (imageMap[code]) {
-        imageElement.setAttribute('src', imageMap[code]);
-        imageElement.setAttribute('width', '1');
-        imageElement.setAttribute('height', '1');
-        imageElement.setAttribute('position', '0 0 -3');
-      } else {
-        alert('Invalid code.');
+    // Handle Proceed button click
+    document.getElementById('proceedButton').addEventListener('click', () => {
+      const code = document.getElementById('codeInput').value.trim();
+      if (code === '') {
+        alert('Please enter a code.');
         return;
       }
 
-      arScene.appendChild(imageElement);
-      document.body.appendChild(arScene);
-    }
-
-    // Button to start the AR experience
-    document.getElementById('startAR').addEventListener('click', () => {
-      const code = getCodeFromUrl();
-      if (!code) {
-        alert('No code found.');
-        return;
-      }
-
-      // Display the AR content based on the code
-      setARContent(code);
-
-      // Show instruction for 3 seconds
+      // Show instruction pop-up for 5 seconds
       const instruction = document.getElementById('instruction');
       instruction.style.display = 'block';
 
       setTimeout(() => {
-        instruction.style.display = 'none';
+        // Redirect to AR viewer page with code as parameter
+        window.location.href = `ar-viewer.html?code=${encodeURIComponent(code)}`;
       }, 3000);
     });
   </script>
