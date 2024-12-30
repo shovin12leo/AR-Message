@@ -3,125 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Tap Interaction with Image</title>
+  <title>3D Tap Interaction</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <style>
-    /* Body styling */
     body {
       margin: 0;
-      padding: 0;
+      overflow: hidden;
       height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: url('https://i.postimg.cc/GtkJQcZR/w1.gif') no-repeat center center/cover;
-      font-family: Arial, sans-serif;
-      color: white;
     }
-
-    /* Centered container */
-    .container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      flex-direction: column;
-    }
-
-    /* Glass effect box */
-    .glass-box {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-      padding: 20px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-      animation: zoomInOut 2s infinite;
-    }
-
-    /* Input and button styling */
-    input, button {
-      width: 90%;
-      margin: 10px auto;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: none;
-    }
-
-    input {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      outline: none;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s ease-in-out;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    /* Instruction pop-up */
-    .instruction-pop {
-      display: none;
-      background: rgba(0, 0, 0, 0.9);
-      color: white;
-      border-radius: 10px;
-      padding: 20px;
-      position: fixed;
-      top: 50%;
+    #message {
+      position: absolute;
+      top: 10px;
       left: 50%;
-      transform: translate(-50%, -50%) scale(0.8);
-      z-index: 1000;
-      text-align: center;
-      animation: zoomInOut 2s infinite;
-    }
-
-    /* Animation for pop-up and glass-box */
-    @keyframes zoomInOut {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-    }
-
-    /* AR Scene Styling */
-    a-scene {
-      width: 100vw;
-      height: 100vh;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 24px;
+      font-family: Arial, sans-serif;
+      z-index: 1;
+      display: none;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div id="message">You tapped the screen!</div>
-  </div>
+  <div id="message">You tapped the screen!</div>
 
   <a-scene embedded>
     <!-- Camera setup for AR experience -->
     <a-entity id="camera" camera position="0 1.6 0" look-controls="enabled: true"></a-entity>
 
     <!-- A simple text for tap prompt -->
-    <a-text value="Tap anywhere to see the image!" position="0 2 -5" scale="2 2 2" color="#FFF" id="tapMessage"></a-text>
+    <a-text value="Tap anywhere to see the message!" position="0 2 -5" scale="2 2 2" color="#FFF" id="tapMessage"></a-text>
 
     <!-- Invisible cursor for detecting touch events -->
     <a-entity cursor="fuse: false; maxDistance: 10" position="0 1.5 -3"></a-entity>
   </a-scene>
 
   <script>
-    // Function to spawn the card with an image at the tap position and focus camera on it
-    function spawnImageCard(event) {
+    // Function to spawn the message at the tap position and focus camera on it
+    function spawnMessage(event) {
       const scene = document.querySelector('a-scene');
       const cameraEl = document.getElementById('camera');
       const messageDiv = document.getElementById("message");
@@ -132,21 +52,19 @@
       if (intersection) {
         const tapPosition = intersection.point; // 3D coordinates of the tap
 
-        // Create a 3D card (a-plane) with an image texture at the tap position
-        const card = document.createElement('a-plane');
-        card.setAttribute('position', `${tapPosition.x} ${tapPosition.y + 1} ${tapPosition.z}`); // Position it 1 unit above the tap
-        card.setAttribute('rotation', '0 0 0');
-        card.setAttribute('width', '3');  // Width of the card
-        card.setAttribute('height', '2'); // Height of the card
-        card.setAttribute('src', 'https://via.placeholder.com/300'); // Image URL (change to your image URL)
-        card.setAttribute('color', '#fff'); // Background color of the card
-        scene.appendChild(card);
+        // Create the 3D message entity at the tap position
+        const message = document.createElement('a-text');
+        message.setAttribute('value', 'You tapped here!');
+        message.setAttribute('position', `${tapPosition.x} ${tapPosition.y + 1} ${tapPosition.z}`); // Position it 1 unit above the tap
+        message.setAttribute('color', 'red');
+        message.setAttribute('scale', '2 2 2');
+        scene.appendChild(message);
 
-        // Move the camera to focus on the card
+        // Move the camera to focus on the message
         cameraEl.setAttribute('position', {
           x: tapPosition.x,
           y: tapPosition.y + 1.6, // Adjust camera height
-          z: tapPosition.z + 3  // Move the camera a bit away from the card
+          z: tapPosition.z + 2  // Move the camera a bit away from the message
         });
 
         // Show HTML message for a short time (3 seconds)
@@ -158,7 +76,7 @@
     }
 
     // Add event listener to handle user taps (in 3D space)
-    document.querySelector('a-scene').addEventListener('click', spawnImageCard);
+    document.querySelector('a-scene').addEventListener('click', spawnMessage);
   </script>
 </body>
 </html>
