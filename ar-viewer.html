@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Tap Interaction with AR Camera</title>
+  <title>3D Tap Interaction with Two Cameras</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <style>
     body {
@@ -29,8 +29,11 @@
   <div id="message">You tapped the screen!</div>
 
   <a-scene embedded>
-    <!-- AR Camera setup -->
+    <!-- Camera for AR experience -->
     <a-entity id="camera" camera position="0 1.6 0" look-controls="enabled: true"></a-entity>
+
+    <!-- Additional camera for displaying the message -->
+    <a-camera id="messageCamera" position="0 1.6 0" look-controls="enabled: false" enabled="false"></a-camera>
 
     <!-- A simple text for tap prompt -->
     <a-text value="Tap anywhere to see the message!" position="0 2 -5" scale="2 2 2" color="#FFF" id="tapMessage"></a-text>
@@ -46,6 +49,7 @@
     // Function to spawn the message at the tap position and focus camera on it
     function spawnMessage(event) {
       const scene = document.querySelector('a-scene');
+      const messageCamera = document.getElementById('messageCamera');
       const virtualMessage = document.getElementById('virtualMessage');
       const messageDiv = document.getElementById("message");
 
@@ -58,6 +62,13 @@
         // Set the virtual message position to the tap point in 3D space
         virtualMessage.setAttribute('position', `${tapPosition.x} ${tapPosition.y + 1} ${tapPosition.z}`); // Position it 1 unit above the tap
         virtualMessage.setAttribute('visible', 'true'); // Make it visible in the AR scene
+
+        // Move the AR camera to focus on the message
+        messageCamera.setAttribute('position', {
+          x: tapPosition.x,
+          y: tapPosition.y + 1.6, // Adjust camera height
+          z: tapPosition.z + 2  // Move the camera a bit away from the message
+        });
 
         // Show HTML message for a short time (3 seconds)
         messageDiv.style.display = "block"; // Show message on screen
