@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual NEW YEAR Message</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="glass-box">
+      <h1 id="welcomeText"></h1>
+      <p>Enter your code to see your personalized AR message:</p>
+      <input type="text" id="codeInput" placeholder="Enter your code">
+      <button id="proceedButton">Proceed</button>
+    </div>
+  </div>
+
+  <div id="instruction" class="instruction-pop">
+    <p>Click the AR button and allow camera access to view your virtual message.</p>
+  </div>
+
+  <script>
+    // Typing effect for the welcome text
+    const welcomeText = document.getElementById("welcomeText");
+    const text = "Welcome to Virtual Messages";
+    let index = 0;
+
+    function typeText() {
+      if (index < text.length) {
+        welcomeText.textContent += text.charAt(index);
+        index++;
+        setTimeout(typeText, 100);
+      }
+    }
+
+    window.onload = () => typeText();
+
+    // Handle Proceed button click
+    document.getElementById('proceedButton').addEventListener('click', () => {
+      const code = document.getElementById('codeInput').value.trim();
+      if (code === '') {
+        alert('Please enter a code.');
+        return;
+      }
+
+      // Show instruction pop-up for 5 seconds
+      const instruction = document.getElementById('instruction');
+      instruction.style.display = 'block';
+
+      setTimeout(() => {
+        // Redirect to AR viewer page with code as parameter
+        window.location.href = `ar-viewer.html?code=${encodeURIComponent(code)}`;
+      }, 3000);
+    });
+  </script>
+</body>
+</html>
