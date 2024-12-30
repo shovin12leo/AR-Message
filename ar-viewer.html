@@ -3,83 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Tap Interaction with Two Cameras</title>
+  <title>Virtual Message - AR Viewer</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      height: 100vh;
-    }
-    #message {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 24px;
-      font-family: Arial, sans-serif;
-      z-index: 1;
-      display: none;
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/AR.js/aframe/build/aframe-ar.js"></script>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div class="container">
+    <div class="glass-box">
+      <h1>Welcome to Your AR Message!</h1>
+      <button id="startAR">Start AR</button>
+    </div>
+  </div>
 
-  <div id="message">You tapped the screen!</div>
+  <div id="instruction" class="instruction-pop">
+    <p>Click the AR button and allow camera access to view your virtual message.</p>
+  </div>
 
-  <a-scene embedded>
-    <!-- Camera for AR experience -->
-    <a-entity id="camera" camera position="0 1.6 0" look-controls="enabled: true"></a-entity>
+  <a-scene embedded arjs>
+    <a-marker preset="hiro">
+      <a-image src="image1.jpg" width="1" height="1" position="0 0 0"></a-image>
+    </a-marker>
 
-    <!-- Additional camera for displaying the message -->
-    <a-camera id="messageCamera" position="0 1.6 0" look-controls="enabled: false" enabled="false"></a-camera>
-
-    <!-- A simple text for tap prompt -->
-    <a-text value="Tap anywhere to see the message!" position="0 2 -5" scale="2 2 2" color="#FFF" id="tapMessage"></a-text>
-
-    <!-- Invisible cursor for detecting touch events -->
-    <a-entity cursor="fuse: false; maxDistance: 10" position="0 1.5 -3"></a-entity>
-
-    <!-- 3D Text Message (hidden by default) -->
-    <a-text id="virtualMessage" value="You tapped here!" position="0 2 -5" scale="2 2 2" color="red" visible="false"></a-text>
+    <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    // Function to spawn the message at the tap position and focus camera on it
-    function spawnMessage(event) {
-      const scene = document.querySelector('a-scene');
-      const messageCamera = document.getElementById('messageCamera');
-      const virtualMessage = document.getElementById('virtualMessage');
-      const messageDiv = document.getElementById("message");
+    function getCodeFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('code');
+    }
 
-      // Get the intersection point where the tap occurred
-      const intersection = event.detail.intersection;
+    function setARContent(code) {
+      const imageMap = {
+        'code1': 'w1.jpeg',
+        'code2': 'image2.jpg',
+        'code3': 'image3.jpg',
+      };
 
-      if (intersection) {
-        const tapPosition = intersection.point; // 3D coordinates of the tap
-
-        // Set the virtual message position to the tap point in 3D space
-        virtualMessage.setAttribute('position', `${tapPosition.x} ${tapPosition.y + 1} ${tapPosition.z}`); // Position it 1 unit above the tap
-        virtualMessage.setAttribute('visible', 'true'); // Make it visible in the AR scene
-
-        // Move the AR camera to focus on the message
-        messageCamera.setAttribute('position', {
-          x: tapPosition.x,
-          y: tapPosition.y + 1.6, // Adjust camera height
-          z: tapPosition.z + 2  // Move the camera a bit away from the message
-        });
-
-        // Show HTML message for a short time (3 seconds)
-        messageDiv.style.display = "block"; // Show message on screen
-        setTimeout(() => {
-          messageDiv.style.display = "none"; // Hide HTML message after 3 seconds
-        }, 3000);
+      if (imageMap[code]) {
+        const arImage = document.querySelector('a-image');
+        arImage.setAttribute('src', imageMap[code]);
+      } else {
+        alert('Invalid code.');
+        return;
       }
     }
 
-    // Add event listener to handle user taps (in 3D space)
-    document.querySelector('a-scene').addEventListener('click', spawnMessage);
+    document.getElementById('startAR').addEventListener('click', () => {
+      const code = getCodeFromUrl();
+      if (!code) {
+        alert('No code found.');
+        return;
+      }
+
+      setARContent(code);
+      const instruction = document.getElementById('instruction');
+      instruction.style.display = 'block';
+
+      setTimeout(() => {
+        instruction.style.display = 'none';
+      }, 3000);
+    });
   </script>
 </body>
 </html>
