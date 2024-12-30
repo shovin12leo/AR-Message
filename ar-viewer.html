@@ -3,81 +3,162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Message</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>3D Tap Interaction with Image</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <style>
+    /* Body styling */
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url('https://i.postimg.cc/GtkJQcZR/w1.gif') no-repeat center center/cover;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    /* Centered container */
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      flex-direction: column;
+    }
+
+    /* Glass effect box */
+    .glass-box {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      animation: zoomInOut 2s infinite;
+    }
+
+    /* Input and button styling */
+    input, button {
+      width: 90%;
+      margin: 10px auto;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    input {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      outline: none;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Instruction pop-up */
+    .instruction-pop {
+      display: none;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      border-radius: 10px;
+      padding: 20px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      z-index: 1000;
+      text-align: center;
+      animation: zoomInOut 2s infinite;
+    }
+
+    /* Animation for pop-up and glass-box */
+    @keyframes zoomInOut {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    /* AR Scene Styling */
+    a-scene {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
+
   <div class="container">
-    <div class="glass-box">
-      <h1 id="welcomeText"></h1>
-      <p>Enter your code to see your personalized AR message:</p>
-      <input type="text" id="codeInput" placeholder="Enter your code">
-      <button id="proceedButton">Proceed</button>
-    </div>
+    <div id="message">You tapped the screen!</div>
   </div>
 
-  <div id="instruction" class="instruction-pop">
-    <p>Click the AR button and allow camera access to view your virtual message.</p>
-  </div>
+  <a-scene embedded>
+    <!-- Camera setup for AR experience -->
+    <a-entity id="camera" camera position="0 1.6 0" look-controls="enabled: true"></a-entity>
 
-  <div id="cameraContainer" class="camera-container">
-    <video id="cameraFeed" autoplay playsinline></video>
-    <canvas id="arCanvas"></canvas>
-  </div>
+    <!-- A simple text for tap prompt -->
+    <a-text value="Tap anywhere to see the image!" position="0 2 -5" scale="2 2 2" color="#FFF" id="tapMessage"></a-text>
+
+    <!-- Invisible cursor for detecting touch events -->
+    <a-entity cursor="fuse: false; maxDistance: 10" position="0 1.5 -3"></a-entity>
+  </a-scene>
 
   <script>
-    // Typing effect for the welcome text
-    const welcomeText = document.getElementById("welcomeText");
-    const text = "Welcome to Virtual Messages";
-    let index = 0;
+    // Function to spawn the card with an image at the tap position and focus camera on it
+    function spawnImageCard(event) {
+      const scene = document.querySelector('a-scene');
+      const cameraEl = document.getElementById('camera');
+      const messageDiv = document.getElementById("message");
 
-    function typeText() {
-      if (index < text.length) {
-        welcomeText.textContent += text.charAt(index);
-        index++;
-        setTimeout(typeText, 100);
-      }
-    }
+      // Get the intersection point where the tap occurred
+      const intersection = event.detail.intersection;
 
-    window.onload = () => typeText();
+      if (intersection) {
+        const tapPosition = intersection.point; // 3D coordinates of the tap
 
-    // Handle Proceed button click
-    document.getElementById('proceedButton').addEventListener('click', () => {
-      const code = document.getElementById('codeInput').value.trim();
-      if (code === '') {
-        alert('Please enter a code.');
-        return;
-      }
+        // Create a 3D card (a-plane) with an image texture at the tap position
+        const card = document.createElement('a-plane');
+        card.setAttribute('position', `${tapPosition.x} ${tapPosition.y + 1} ${tapPosition.z}`); // Position it 1 unit above the tap
+        card.setAttribute('rotation', '0 0 0');
+        card.setAttribute('width', '3');  // Width of the card
+        card.setAttribute('height', '2'); // Height of the card
+        card.setAttribute('src', 'https://via.placeholder.com/300'); // Image URL (change to your image URL)
+        card.setAttribute('color', '#fff'); // Background color of the card
+        scene.appendChild(card);
 
-      // Show instruction pop-up for 5 seconds
-      const instruction = document.getElementById('instruction');
-      instruction.style.display = 'block';
-
-      setTimeout(() => {
-        // Redirect to AR viewer page with code as parameter
-        window.location.href = `ar-viewer.html?code=${encodeURIComponent(code)}`;
-      }, 3000);
-    });
-
-    // Initialize Camera Feed
-    function startCamera() {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then((stream) => {
-          const video = document.getElementById('cameraFeed');
-          video.srcObject = stream;
-          video.play();
-        })
-        .catch((err) => {
-          console.log('Error accessing camera:', err);
-          alert('Please allow camera access to view the AR message.');
+        // Move the camera to focus on the card
+        cameraEl.setAttribute('position', {
+          x: tapPosition.x,
+          y: tapPosition.y + 1.6, // Adjust camera height
+          z: tapPosition.z + 3  // Move the camera a bit away from the card
         });
+
+        // Show HTML message for a short time (3 seconds)
+        messageDiv.style.display = "block"; // Show message on screen
+        setTimeout(() => {
+          messageDiv.style.display = "none"; // Hide HTML message after 3 seconds
+        }, 3000);
+      }
     }
 
-    // Start the camera feed when the page loads
-    window.onload = () => {
-      typeText();
-      startCamera();
-    };
+    // Add event listener to handle user taps (in 3D space)
+    document.querySelector('a-scene').addEventListener('click', spawnImageCard);
   </script>
 </body>
 </html>
