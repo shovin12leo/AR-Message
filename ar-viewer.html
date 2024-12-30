@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual NEW YEAR Message</title>
+  <title>Virtual Message</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,6 +18,11 @@
 
   <div id="instruction" class="instruction-pop">
     <p>Click the AR button and allow camera access to view your virtual message.</p>
+  </div>
+
+  <div id="cameraContainer" class="camera-container">
+    <video id="cameraFeed" autoplay playsinline></video>
+    <canvas id="arCanvas"></canvas>
   </div>
 
   <script>
@@ -53,6 +58,26 @@
         window.location.href = `ar-viewer.html?code=${encodeURIComponent(code)}`;
       }, 3000);
     });
+
+    // Initialize Camera Feed
+    function startCamera() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+          const video = document.getElementById('cameraFeed');
+          video.srcObject = stream;
+          video.play();
+        })
+        .catch((err) => {
+          console.log('Error accessing camera:', err);
+          alert('Please allow camera access to view the AR message.');
+        });
+    }
+
+    // Start the camera feed when the page loads
+    window.onload = () => {
+      typeText();
+      startCamera();
+    };
   </script>
 </body>
 </html>
