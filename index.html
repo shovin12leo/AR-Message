@@ -36,6 +36,14 @@
 
     window.onload = () => typeText();
 
+    // Mapping codes to specific URLs
+    const codeMapping = {
+      "NEWYEAR2024": "newyear-2024.html",
+      "BIRTHDAY123": "birthday-message.html",
+      "CONGRATS567": "congratulations.html"
+      // Add more code mappings as needed
+    };
+
     // Handle Proceed button click
     document.getElementById('proceedButton').addEventListener('click', () => {
       const code = document.getElementById('codeInput').value.trim();
@@ -44,14 +52,19 @@
         return;
       }
 
-      // Show instruction pop-up for 5 seconds
-      const instruction = document.getElementById('instruction');
-      instruction.style.display = 'block';
+      // Check if the code matches any in the mapping
+      if (codeMapping[code]) {
+        // Show instruction pop-up for 5 seconds
+        const instruction = document.getElementById('instruction');
+        instruction.style.display = 'block';
 
-      setTimeout(() => {
-        // Redirect to AR viewer page with code as parameter
-        window.location.href = `ar-viewer.html?code=${encodeURIComponent(code)}`;
-      }, 3000);
+        setTimeout(() => {
+          // Redirect to the corresponding URL based on the code
+          window.location.href = codeMapping[code];
+        }, 3000);
+      } else {
+        alert('Invalid code. Please try again.');
+      }
     });
   </script>
 </body>
